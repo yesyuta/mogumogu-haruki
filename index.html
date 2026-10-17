@@ -18,14 +18,14 @@
 <style>
 :root{
   --bg:#F2F5F1; --surface:#FFFFFF; --ink:#1F2B24; --muted:#66756C; --line:#D9E1DA;
-  --leaf:#2E7A57; --leaf-soft:#DCEEE3; --iron:#B5542F; --iron-soft:#F6E2D8;
+  --leaf:#2E7A57; --leaf-soft:#DCEEE3; --iron:#B5542F; --iron-soft:#F6E2D8; --sleep:#3D4E8C; --sleep-soft:#E3E7F5;
   --display:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",-apple-system,system-ui,sans-serif;
   --body:"Noto Sans JP","Hiragino Sans",-apple-system,system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root{
   --bg:#141A16; --surface:#1C241F; --ink:#E6EEE8; --muted:#93A399; --line:#2C3832;
-  --leaf:#6FC79A; --leaf-soft:#22392C; --iron:#E59572; --iron-soft:#3A2820; color-scheme:dark}}
+  --leaf:#6FC79A; --leaf-soft:#22392C; --iron:#E59572; --iron-soft:#3A2820; --sleep:#6E80C9; --sleep-soft:#262D47; color-scheme:dark}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
@@ -144,6 +144,43 @@ hr{border:0;border-top:1px dashed var(--line);margin:2px 0}
 .newtag{font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--leaf-soft);color:var(--leaf)}
 .ractions{display:flex;gap:8px;flex-wrap:wrap}
 .ractions .btn{flex:1 1 140px}
+.sec{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
+.sec button{font:inherit;font-weight:700;font-size:15px;border:0;border-radius:9px;min-height:40px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.sec button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.sec .live{width:7px;height:7px;border-radius:50%;background:var(--sleep);display:inline-block}
+.status{font-size:13px;color:var(--muted);margin:0;font-variant-numeric:tabular-nums}
+.status b{color:var(--ink)}
+.sleepnow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.sleepnow.on{background:var(--sleep);border-color:var(--sleep);color:#fff}
+.sleepnow div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sleepnow b{font-family:var(--display);font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.sleepnow span{font-size:13px;opacity:.8}
+.btn.big{min-height:56px;font-size:18px;padding:0 26px;border-radius:14px;background:var(--sleep);color:#fff}
+.sleepnow.on .btn.big{background:#fff;color:var(--sleep)}
+.timeline{position:relative;height:30px;border-radius:8px;background:var(--bg);overflow:hidden;margin-bottom:18px}
+.timeline .blk{position:absolute;top:0;bottom:0;background:var(--sleep);opacity:.85}
+.timeline .blk.nap{opacity:.55}
+.timeline .ml{position:absolute;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--leaf);border:2px solid var(--surface)}
+.timeline .now{position:absolute;top:0;bottom:0;width:2px;background:var(--iron)}
+.timeline .tk{position:absolute;bottom:-17px;font-size:10px;color:var(--muted);transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.timeline .tk:first-of-type{transform:none}
+.timeline .grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.ticks{position:relative;height:14px;margin:-16px 0 10px}
+.ticks span{position:absolute;font-size:10px;color:var(--muted);transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.ticks span:first-child{transform:none}.ticks span:last-child{transform:translateX(-100%)}
+.sleeplist{display:flex;flex-direction:column;gap:8px}
+.srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr) auto;grid-template-areas:'b s a e x' '. d d d .';align-items:center;gap:2px 6px}
+.srow .badge{grid-area:b}.srow [data-ss]{grid-area:s}.srow .arrow{grid-area:a}.srow [data-se]{grid-area:e}.srow .xbtn{grid-area:x}.srow .dur{grid-area:d;text-align:left!important}
+input[type=time]::-webkit-calendar-picker-indicator{display:none}
+.srow input[type=time]{width:100%;min-height:40px;padding:6px 4px;font-size:16px;text-align:center}
+.srow .arrow{color:var(--muted)}
+.srow .dur{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.6em;text-align:right}
+.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.badge.night{background:var(--sleep);color:#fff}
+.badge.nap{background:var(--sleep-soft);color:var(--sleep)}
+.xbtn{font:inherit;font-size:13px;border:0;background:none;color:var(--muted);min-width:36px;min-height:36px;cursor:pointer;border-radius:8px}
+.xbtn.confirm{color:#fff;background:var(--iron);padding:0 8px}
+.tile.sleep b{color:var(--sleep)}
 .btn.wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#1F8A4C;color:#fff}
 .btn.wa svg{width:20px;height:20px;flex:none}
 .btn.line{background:none;color:var(--leaf);border:1.5px solid var(--leaf)}
@@ -209,19 +246,37 @@ hr{border:0;border-top:1px dashed var(--line);margin:2px 0}
       <button class="today-btn" id="todayBtn"></button>
       <button id="next" aria-label="Next day">›</button>
     </div>
+    <div class="sec" id="secTabs" role="tablist"><button data-s="food"></button><button data-s="milk"></button><button data-s="sleep"></button></div>
     <div class="meals" id="meals" role="group"></div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:2px">
-    <p class="today-sum" id="sum"></p>
+    <p class="status" id="status"></p>
     <p class="who" id="who"></p>
   </div>
 
+  <div id="secMilk" class="stack" hidden>
   <section class="rcard milk">
     <div class="group-h"><h2 id="tMilk"></h2><small id="milkTotal"></small></div>
     <div class="milkgrid" id="milkGrid"></div>
   </section>
+  </div>
 
+  <div id="secSleep" class="stack" hidden>
+    <section class="sleepnow" id="sleepNow">
+      <div><b id="snMain"></b><span id="snSub"></span></div>
+      <button class="btn big" id="snBtn"></button>
+    </section>
+    <section class="rcard">
+      <div class="timeline" id="timeline" aria-hidden="true"></div>
+      <div class="group-h"><h2 id="tSleepList"></h2><small id="sleepTotal"></small></div>
+      <div class="sleeplist" id="sleepList"></div>
+      <button class="btn line" id="sleepAdd"></button>
+    </section>
+  </div>
+
+  <div id="secFood" class="stack">
+  <p class="today-sum" id="sum"></p>
   <div id="groups" style="display:flex;flex-direction:column;gap:18px"></div>
 
   <div class="group">
@@ -233,15 +288,6 @@ hr{border:0;border-top:1px dashed var(--line);margin:2px 0}
     </form>
   </div>
 
-  <div class="group">
-    <h2 id="tNote"></h2>
-    <textarea id="note"></textarea>
-  </div>
-
-  <a class="btn wa" id="waBtn" href="#" target="_blank" rel="noopener"></a>
-
-  <hr>
-
   <section class="week">
     <div class="group-h"><h2 id="tWeek"></h2><small id="tWeekSub"></small></div>
     <div class="bars" id="bars"></div>
@@ -250,6 +296,14 @@ hr{border:0;border-top:1px dashed var(--line);margin:2px 0}
       <div class="miss" id="miss"></div>
     </div>
   </section>
+  </div>
+
+  <div class="group">
+    <h2 id="tNote"></h2>
+    <textarea id="note"></textarea>
+  </div>
+
+  <a class="btn wa" id="waBtn" href="#" target="_blank" rel="noopener"></a>
   </div>
 
   <div id="reportView" class="stack" hidden>
@@ -316,6 +370,13 @@ const T={
    nameLabel:'表示名（例：Yuta）',vTitle:'メールを確認してください',vHelp:e=>`${e} に確認メールを送りました。メールの中のリンクを押してから、下の「確認しました」を押してください。迷惑メールフォルダも見てください。`,
    vCheck:'確認しました',vResend:'確認メールをもう一度送る',vNotYet:'まだ確認できていません。メールのリンクを押してから、もう一度お試しください。',vSent:'確認メールを送りました',
    closed:'新規登録は受け付けていません。登録済みの方はログインしてください。',nmTitle:'記録に表示する名前を入れてください',nmSave:'保存',
+   secFood:'ごはん',secMilk:'ミルク',secSleep:'ねんね',sleepBtn:'寝た',wakeBtn:'起きた',sleeping:x=>`ねんね中 ${x}`,sinceT:s=>`${s} から`,awake:x=>`起きてから ${x}`,
+   noSleep:'まだねんねの記録がありません',night:'夜',nap:'お昼寝',addSleep:'＋ ねんねを手入力で追加',delQ:'削除',listTitle:'この日のねんね',
+   hm:m=>m>=60?`${Math.floor(m/60)}時間${m%60?String(m%60).padStart(2,'0')+'分':''}`:`${m}分`,ago2:x=>`${x}前`,
+   lastMilk:(tm,ago)=>`最後のミルク <b>${tm}</b>（${ago}前）`,stSleeping:x=>`<b>ねんね中</b> ${x}`,stAwake:x=>`起きてから <b>${x}</b>`,
+   sleepSum:(n,nm,ng)=>[n?`お昼寝 ${n}回・${nm}`:'',ng?`夜 ${ng}`:''].filter(Boolean).join(' ／ '),
+   tNight:'夜の睡眠 平均',tNap:'お昼寝 1日平均',nightLine:(a,b,w)=>`夜の睡眠: 平均 ${a}（寝かしつけ ${b}・起床 ${w}）`,napLine:(n,m)=>`お昼寝: 1日平均 ${n}回・${m}`,
+   dSleep:x=>`ねんね（${x}）`,ongoing:'ねんね中',csvEnd:'終了',csvMin:'時間(分)',sleepName:'ねんね',endPh:'起きた',
    waBtn:'この日の記録をWhatsAppで送る',dMilk:(n,t)=>`ミルク（${n}回・合計 ${t}ml）`,dIron:'鉄分',dNote:'メモ',dNone:'—',
    sHelp:'はじめて使う方は、自分のメールアドレスと好きなパスワードを決めてください。',sBtn:'パスワードを作って始める',
    toSignup:'はじめての方はこちら',toLogin:'すでにパスワードを作った方はこちら',
@@ -348,6 +409,13 @@ const T={
    nameLabel:'Display name (e.g. Ying)',vTitle:'Check your email',vHelp:e=>`We sent a confirmation email to ${e}. Tap the link in it, then tap "I've confirmed" below. Check your spam folder too.`,
    vCheck:"I've confirmed",vResend:'Send the email again',vNotYet:"Not confirmed yet. Tap the link in the email, then try again.",vSent:'Confirmation email sent',
    closed:'Sign-up is closed. If you already have an account, please sign in.',nmTitle:'Enter the name to show on the log',nmSave:'Save',
+   secFood:'Food',secMilk:'Milk',secSleep:'Sleep',sleepBtn:'Asleep',wakeBtn:'Woke up',sleeping:x=>`Asleep ${x}`,sinceT:s=>`since ${s}`,awake:x=>`Awake ${x}`,
+   noSleep:'No sleep logged yet',night:'Night',nap:'Nap',addSleep:'+ Add sleep manually',delQ:'Delete',listTitle:"This day's sleep",
+   hm:m=>m>=60?`${Math.floor(m/60)}h${m%60?' '+(m%60)+'m':''}`:`${m}m`,ago2:x=>`${x} ago`,
+   lastMilk:(tm,ago)=>`Last milk <b>${tm}</b> (${ago} ago)`,stSleeping:x=>`<b>Asleep</b> ${x}`,stAwake:x=>`Awake <b>${x}</b>`,
+   sleepSum:(n,nm,ng)=>[n?`${n} ${n===1?'nap':'naps'} · ${nm}`:'',ng?`night ${ng}`:''].filter(Boolean).join(' / '),
+   tNight:'Night sleep (avg)',tNap:'Naps per day (avg)',nightLine:(a,b,w)=>`Night sleep: ${a} on average (bedtime ${b}, wake ${w})`,napLine:(n,m)=>`Naps: ${n} per day, ${m} on average`,
+   dSleep:x=>`Sleep (${x})`,ongoing:'asleep now',csvEnd:'End',csvMin:'Minutes',sleepName:'Sleep',endPh:'Woke',
    waBtn:"Send this day's log on WhatsApp",dMilk:(n,t)=>`Milk (${n} ${n===1?'feed':'feeds'}, ${t}ml total)`,dIron:'Iron',dNote:'Note',dNone:'—',
    sHelp:'First time? Enter your email and choose a password.',sBtn:'Create password and start',
    toSignup:'First time here?',toLogin:'Already have a password? Sign in',
@@ -380,6 +448,13 @@ const T={
    nameLabel:'显示名称（例：Ying）',vTitle:'请确认你的邮箱',vHelp:e=>`我们已向 ${e} 发送了确认邮件。请点击邮件里的链接，然后点下面的“我已确认”。也请查看垃圾邮件文件夹。`,
    vCheck:'我已确认',vResend:'重新发送确认邮件',vNotYet:'还没有确认。请先点击邮件里的链接，再试一次。',vSent:'确认邮件已发送',
    closed:'已停止新用户注册。已有账号请直接登录。',nmTitle:'请输入在记录中显示的名字',nmSave:'保存',
+   secFood:'辅食',secMilk:'奶',secSleep:'睡眠',sleepBtn:'睡着了',wakeBtn:'醒了',sleeping:x=>`睡眠中 ${x}`,sinceT:s=>`${s} 开始`,awake:x=>`醒来已 ${x}`,
+   noSleep:'还没有睡眠记录',night:'夜间',nap:'小睡',addSleep:'＋ 手动添加睡眠',delQ:'删除',listTitle:'这一天的睡眠',
+   hm:m=>m>=60?`${Math.floor(m/60)}小时${m%60?(m%60)+'分钟':''}`:`${m}分钟`,ago2:x=>`${x}前`,
+   lastMilk:(tm,ago)=>`上次喝奶 <b>${tm}</b>（${ago}前）`,stSleeping:x=>`<b>睡眠中</b> ${x}`,stAwake:x=>`醒来已 <b>${x}</b>`,
+   sleepSum:(n,nm,ng)=>[n?`小睡 ${n}次·${nm}`:'',ng?`夜间 ${ng}`:''].filter(Boolean).join(' ／ '),
+   tNight:'夜间睡眠 平均',tNap:'小睡 每天平均',nightLine:(a,b,w)=>`夜间睡眠：平均 ${a}（入睡 ${b}，起床 ${w}）`,napLine:(n,m)=>`小睡：平均每天 ${n}次，${m}`,
+   dSleep:x=>`睡眠（${x}）`,ongoing:'睡眠中',csvEnd:'结束',csvMin:'时长(分钟)',sleepName:'睡眠',endPh:'醒来',
    waBtn:'用 WhatsApp 发送这一天的记录',dMilk:(n,t)=>`奶（${n}次，合计 ${t}ml）`,dIron:'含铁',dNote:'备注',dNone:'—',
    sHelp:'第一次使用？请输入你的邮箱并设置密码。',sBtn:'设置密码并开始',
    toSignup:'第一次使用请点这里',toLogin:'已经设置过密码？点这里登录',
@@ -417,7 +492,13 @@ const FEEDS=6;
 function normMilk(m){const a=Array.isArray(m)?m.slice(0,FEEDS):[];while(a.length<FEEDS)a.push(null);return a.map(v=>typeof v==='number'&&v>0?v:null)}
 function normTime(m){const a=Array.isArray(m)?m.slice(0,FEEDS):[];while(a.length<FEEDS)a.push(null);return a.map(v=>typeof v==='string'&&/^\d\d:\d\d$/.test(v)?v:null)}
 const milkSum=m=>normMilk(m).reduce((a,v)=>a+(v||0),0);
-function getDay(k){const d=days[k]||{};return{...d,meals:Object.assign({b:[],l:[],d:[],s:[]},JSON.parse(JSON.stringify(d.meals||{}))),note:d.note||'',milk:normMilk(d.milk),milkT:normTime(d.milkT)}}
+const toMin=v=>{if(!v)return null;const[h,m]=v.split(':').map(Number);return h*60+m};
+const fromMin=m=>pad(Math.floor(((m%1440)+1440)%1440/60))+':'+pad(((m%1440)+1440)%1440%60);
+const isNight=st=>{const m=toMin(st);return m>=18*60||m<5*60};
+function normSleeps(a){return(Array.isArray(a)?a:[]).filter(x=>x&&typeof x.s==='string'&&/^\d\d:\d\d$/.test(x.s)).map(x=>({s:x.s,e:typeof x.e==='string'&&/^\d\d:\d\d$/.test(x.e)?x.e:null})).sort((a,b)=>toMin(a.s)-toMin(b.s))}
+const sortKey=st=>{const m=toMin(st);return m<5*60?m+1440:m};
+const durMin=(st,en)=>{if(!en)return null;const a=toMin(st),b=toMin(en);return b>=a?b-a:b+1440-a};
+function getDay(k){const d=days[k]||{};return{...d,meals:Object.assign({b:[],l:[],d:[],s:[]},JSON.parse(JSON.stringify(d.meals||{}))),note:d.note||'',milk:normMilk(d.milk),milkT:normTime(d.milkT),sleeps:normSleeps(d.sleeps)}}
 function allFoods(){const m={};CATS.forEach(c=>c.items.forEach(([id,ja,en,fe])=>m[id]={id,ja,en,zh:ZH[id]||en,fe:!!fe,cat:c.id}));custom.forEach(f=>m[f.id]={id:f.id,ja:f.name,en:f.name,zh:f.name,fe:false,cat:f.cat,custom:true});return m}
 const fname=f=>lang==='ja'?f.ja:lang==='zh'?f.zh:f.en;
 const LOC=()=>lang==='ja'?'ja-JP':lang==='zh'?'zh-SG':'en-SG';
@@ -435,11 +516,12 @@ async function write(path,body){
 }
 let noteTimer=null;
 function saveDay(k){const d=days[k];d.updatedBy=myName();d.updatedAt=new Date().toISOString();
-  write('days/'+k,{date:k,meals:d.meals,note:d.note,milk:normMilk(d.milk),milkT:normTime(d.milkT),updatedBy:d.updatedBy,updatedAt:d.updatedAt})}
+  write('days/'+k,{date:k,meals:d.meals,note:d.note,milk:normMilk(d.milk),milkT:normTime(d.milkT),sleeps:normSleeps(d.sleeps),updatedBy:d.updatedBy,updatedAt:d.updatedAt})}
 
 function toggle(id){const d=getDay(date);const arr=d.meals[meal];const i=arr.indexOf(id);i>=0?arr.splice(i,1):arr.push(id);days[date]=d;saveDay(date);render()}
 function shift(n){const d=parse(date);d.setDate(d.getDate()+n);date=key(d);render()}
 
+let sec=(()=>{try{const v=localStorage.getItem('hk-sec');return['food','milk','sleep'].includes(v)?v:'food'}catch(e){return'food'}})();
 let view='log', rPeriod='week', rAnchor=key(new Date());
 function periodRange(){const a=parse(rAnchor);if(rPeriod==='week'){const s=new Date(a);s.setDate(a.getDate()-((a.getDay()+6)%7));const e=new Date(s);e.setDate(s.getDate()+6);return{s,e}}
   return{s:new Date(a.getFullYear(),a.getMonth(),1),e:new Date(a.getFullYear(),a.getMonth()+1,0)}}
@@ -449,14 +531,15 @@ function buildReport(){
   const{s,e}=periodRange(),foods=allFoods(),today=new Date();today.setHours(0,0,0,0);
   const keys=[];for(const d=new Date(s);d<=e;d.setDate(d.getDate()+1))keys.push(key(d));
   const elapsed=keys.filter(k=>parse(k)<=today).length;
-  const counts={},notes=[];let logged=0,iron=0,sumKinds=0,milkDays=0,milkTot=0;
-  keys.forEach(k=>{const ids=dayIds(k,foods);if(ids.length){logged++;sumKinds+=ids.length}if(ids.some(id=>foods[id].fe))iron++;ids.forEach(id=>counts[id]=(counts[id]||0)+1);const n=getDay(k).note;if(n&&n.trim())notes.push({k,n:n.trim()});const ms=milkSum(getDay(k).milk);if(ms){milkDays++;milkTot+=ms}});
+  const counts={},notes=[];let logged=0,iron=0,sumKinds=0,milkDays=0,milkTot=0,nights=0,nightTot=0,bedSum=0,wakeSum=0,wakeN=0,sleepDays=0,napCnt=0,napTot=0;
+  keys.forEach(k=>{const ids=dayIds(k,foods);if(ids.length){logged++;sumKinds+=ids.length}if(ids.some(id=>foods[id].fe))iron++;ids.forEach(id=>counts[id]=(counts[id]||0)+1);const n=getDay(k).note;if(n&&n.trim())notes.push({k,n:n.trim()});const ms=milkSum(getDay(k).milk);if(ms){milkDays++;milkTot+=ms}
+    const sl=getDay(k).sleeps;if(sl.length){sleepDays++;sl.forEach(x=>{const dm=durMin(x.s,x.e);if(isNight(x.s)){if(dm){nights++;nightTot+=dm;bedSum+=sortKey(x.s);wakeSum+=toMin(x.e);wakeN++}}else{napCnt++;if(dm)napTot+=dm}})}});
   const first={};Object.keys(days).sort().forEach(k=>dayIds(k,foods).forEach(id=>{if(!first[id])first[id]=k}));
   // the first week of using the app only records what he already eats, so it doesn't count as "first tried"
   const allK=Object.keys(days).filter(k=>dayIds(k,foods).length).sort();let from=keys[0];
   if(allK.length){const g=parse(allK[0]);g.setDate(g.getDate()+7);if(key(g)>from)from=key(g)}
   const newIds=Object.keys(first).filter(id=>first[id]>=from&&first[id]<=keys[keys.length-1]);
-  return{s,e,keys,elapsed,counts,notes,logged,iron,milkDays,milkTot,milkAvg:milkDays?Math.round(milkTot/milkDays):0,avg:logged?Math.round(sumKinds/logged*10)/10:0,newIds,foods};
+  return{s,e,keys,elapsed,counts,notes,logged,iron,nights,nightAvg:nights?Math.round(nightTot/nights):0,bedAvg:nights?fromMin(Math.round(bedSum/nights)):'',wakeAvg:wakeN?fromMin(Math.round(wakeSum/wakeN)):'',sleepDays,napPerDay:sleepDays?Math.round(napCnt/sleepDays*10)/10:0,napMinPerDay:sleepDays?Math.round(napTot/sleepDays):0,milkDays,milkTot,milkAvg:milkDays?Math.round(milkTot/milkDays):0,avg:logged?Math.round(sumKinds/logged*10)/10:0,newIds,foods};
 }
 function renderReport(){
   const t=L(),r=buildReport(),f=r.foods,sep=t.sep;
@@ -466,7 +549,9 @@ function renderReport(){
   $('#rTiles').innerHTML=`<div class="tile"><b>${r.logged}<small>/${r.elapsed||r.keys.length}${t.daysU}</small></b><span>${t.tLogged}</span></div>`+
     `<div class="tile"><b>${eaten.length}<small>${t.kindsU}</small></b><span>${t.tFoods}<br>${r.logged?t.avg(r.avg):''}</span></div>`+
     `<div class="tile fe"><b>${r.iron}<small>${t.daysU}</small></b><span>${t.tIron}</span></div>`+
-    `<div class="tile milk"><b>${r.milkDays?r.milkAvg:'–'}<small>ml</small></b><span>${t.tMilk}</span></div>`;
+    `<div class="tile milk"><b>${r.milkDays?r.milkAvg:'–'}<small>ml</small></b><span>${t.tMilk}</span></div>`+
+    `<div class="tile sleep"><b>${r.nights?t.hm(r.nightAvg):'–'}</b><span>${t.tNight}${r.nights?`<br>${r.bedAvg} → ${r.wakeAvg}`:''}</span></div>`+
+    `<div class="tile sleep"><b>${r.sleepDays?r.napPerDay:'–'}<small>${r.sleepDays?' · '+t.hm(r.napMinPerDay):''}</small></b><span>${t.tNap}</span></div>`;
   $('#rNew').innerHTML=r.newIds.length?`<div class="rcard"><h2>${t.newFoods}</h2><div class="miss">${r.newIds.map(id=>`<span class="newtag">${esc(fname(f[id]))}</span>`).join('')}</div></div>`:'';
   const max=Math.max(1,r.elapsed||r.keys.length);
   $('#rCats').innerHTML=r.logged?CATS.map(c=>{const ids=eaten.filter(id=>f[id].cat===c.id).sort((a,b)=>r.counts[b]-r.counts[a]);if(!ids.length)return'';
@@ -484,6 +569,8 @@ function reportText(){
   L1.push(`${t.tFoods}: ${Object.keys(r.counts).length}${t.kindsU}`+(r.logged?(lang==='en'?` (${t.avg(r.avg)})`:`（${t.avg(r.avg)}）`):''));
   L1.push(`${t.tIron}: ${r.iron}${t.daysU}`);
   if(r.milkDays)L1.push(t.milkLine(r.milkAvg,r.milkTot,r.milkDays));
+  if(r.nights)L1.push(t.nightLine(t.hm(r.nightAvg),r.bedAvg,r.wakeAvg));
+  if(r.sleepDays)L1.push(t.napLine(r.napPerDay,t.hm(r.napMinPerDay)));
   if(r.newIds.length)L1.push(`${t.newFoods}: ${r.newIds.map(id=>fname(f[id])).join(sep)}`);
   CATS.forEach(c=>{const ids=Object.keys(r.counts).filter(id=>f[id].cat===c.id).sort((a,b)=>r.counts[b]-r.counts[a]);if(ids.length)L1.push('',`【${t.cats[c.id]}】`+ids.map(id=>`${fname(f[id])} ${t.dayN(r.counts[id])}`).join(sep))});
   const miss=Object.values(f).filter(x=>!r.counts[x.id]);
@@ -492,12 +579,14 @@ function reportText(){
   return L1.join('\n');
 }
 function buildCsv(){
-  const t=L(),foods=allFoods(),rows=[t.csvHead];
+  const t=L(),foods=allFoods(),rows=[[...t.csvHead,t.csvEnd,t.csvMin]];
   Object.keys(days).sort().forEach(k=>{const d=getDay(k),wd=t.wd[parse(k).getDay()],by=(days[k]&&days[k].updatedBy)||'';
     MEALS.forEach(m=>d.meals[m].forEach(id=>{const f=foods[id];if(!f)return;rows.push([k,wd,t.meals[m],fname(f),t.cats[f.cat],f.fe?t.ironMark:'','',by,'',''])}));
     d.milk.forEach((ml,i)=>{if(ml)rows.push([k,wd,`${t.milkName} ${t.feed(i+1)}`,t.milkName,'','','',by,ml,d.milkT[i]||''])});
+    d.sleeps.forEach(x=>{const nt=isNight(x.s);rows.push([k,wd,`${t.sleepName} ${nt?t.night:t.nap}`,t.sleepName,'','','',by,'',x.s,x.e||'',durMin(x.s,x.e)??''])});
     if(d.note&&d.note.trim())rows.push([k,wd,t.noteRow,'','','',d.note.trim(),by,'','']);
   });
+  const w=rows[0].length;rows.forEach(r=>{while(r.length<w)r.push('')});
   return rows;
 }
 async function exportCsv(){
@@ -514,6 +603,8 @@ function dayText(k){
   MEALS.forEach(m=>{const ids=d.meals[m].filter(id=>foods[id]);out.push(t.meals[m]+colon+(ids.length?ids.map(id=>fname(foods[id])).join(sep):t.dNone))});
   const feeds=d.milk.map((ml,i)=>ml?{ml,tm:d.milkT[i]}:null).filter(Boolean);
   if(feeds.length){out.push('',t.dMilk(feeds.length,milkSum(d.milk)));feeds.slice().sort((a,b)=>(a.tm||'99').localeCompare(b.tm||'99')).forEach(f=>out.push(`・${f.tm?f.tm+'  ':''}${f.ml}ml`))}
+  if(d.sleeps.length){const tt=sleepTotals(k);out.push('',t.dSleep(t.sleepSum(tt.naps,t.hm(tt.napM),tt.nightM?t.hm(tt.nightM):'')||t.ongoing));
+    d.sleeps.forEach(x=>{const dm=durMin(x.s,x.e);out.push(`・${x.s}〜${x.e||''}  ${isNight(x.s)?t.night:t.nap}  ${dm!==null?t.hm(dm):t.ongoing}`)})}
   const fe=[...new Set(Object.values(d.meals).flat())].filter(id=>foods[id]&&foods[id].fe).map(id=>fname(foods[id]));
   if(fe.length)out.push('',t.dIron+colon+fe.join(sep));
   if(d.note&&d.note.trim())out.push('',t.dNote+colon+d.note.trim());
@@ -523,6 +614,61 @@ async function shareReport(){
   const text=reportText();
   if(navigator.share){try{await navigator.share({title:L().rTitle,text});return}catch(e){if(e&&e.name==='AbortError')return}}
   try{await navigator.clipboard.writeText(text);toast(L().copied)}catch(e){toast(L().saveErr)}
+}
+
+// absolute minutes since epoch-day for a sleep on day k
+const dayStart=k=>parse(k).getTime()/60000;
+function absSleep(k,x){const st=dayStart(k)+toMin(x.s);return{st,en:x.e?st+durMin(x.s,x.e):null}}
+function nowMin(){return Date.now()/60000}
+function shiftKey(k,n){const d=parse(k);d.setDate(d.getDate()+n);return key(d)}
+function ongoingSleep(){const tk=key(new Date());for(const k of [tk,shiftKey(tk,-1)]){const sl=getDay(k).sleeps;for(let i=sl.length-1;i>=0;i--)if(!sl[i].e)return{k,i,x:sl[i]}}return null}
+function lastWakeAbs(){const tk=key(new Date());let best=null;for(const k of [tk,shiftKey(tk,-1)])getDay(k).sleeps.forEach(x=>{if(x.e){const a=absSleep(k,x).en;if(a<=nowMin()+1&&(best===null||a>best))best=a}});return best}
+function lastMilk(){const tk=key(new Date());for(const k of [tk,shiftKey(tk,-1)]){const d=getDay(k);let best=null;d.milk.forEach((ml,i)=>{if(ml&&d.milkT[i]){const a=dayStart(k)+toMin(d.milkT[i]);if(a<=nowMin()+1&&(best===null||a>best))best=a}});if(best!==null)return best}return null}
+function sleepTotals(k){const sl=getDay(k).sleeps;let naps=0,napM=0,nightM=0;sl.forEach(x=>{const dm=durMin(x.s,x.e);if(isNight(x.s)){if(dm)nightM+=dm}else{naps++;if(dm)napM+=dm}});return{naps,napM,nightM,count:sl.length}}
+const fmtDur=m=>L().hm(Math.max(0,Math.round(m)));
+function sleepTap(){
+  const tk=key(new Date()),o=ongoingSleep();
+  if(o){const d=getDay(o.k);d.sleeps[o.i].e=nowHM();days[o.k]=d;saveDay(o.k)}
+  else{const d=getDay(tk);d.sleeps.push({s:nowHM(),e:null});d.sleeps=normSleeps(d.sleeps);days[tk]=d;saveDay(tk)}
+  render();
+}
+function renderStatus(){
+  const t=L();if(date!==key(new Date())){$('#status').innerHTML='';return}
+  const parts=[],lm=lastMilk(),o=ongoingSleep(),lw=lastWakeAbs(),n=nowMin();
+  if(lm!==null)parts.push(t.lastMilk(fromMin(lm-dayStart(key(new Date()))),fmtDur(n-lm)));
+  if(o)parts.push(t.stSleeping(fmtDur(n-absSleep(o.k,o.x).st)));else if(lw!==null)parts.push(t.stAwake(fmtDur(n-lw)));
+  $('#status').innerHTML=parts.join(' ・ ');
+}
+function renderSleep(){
+  const t=L(),isToday=date===key(new Date()),day=getDay(date),o=ongoingSleep(),n=nowMin();
+  // big status + button (today only)
+  $('#sleepNow').hidden=!isToday;
+  if(isToday){const lw=lastWakeAbs();
+    $('#sleepNow').classList.toggle('on',!!o);
+    if(o){const st=absSleep(o.k,o.x).st;$('#snMain').textContent=t.sleeping(fmtDur(n-st));$('#snSub').textContent=t.sinceT(o.x.s);$('#snBtn').textContent=t.wakeBtn}
+    else{$('#snMain').textContent=lw!==null?t.awake(fmtDur(n-lw)):t.noSleep;$('#snSub').textContent='';$('#snBtn').textContent=t.sleepBtn}}
+  // timeline 0-24 for this date (includes the previous night's tail)
+  const base=dayStart(date),blocks=[];
+  [shiftKey(date,-1),date].forEach(k=>getDay(k).sleeps.forEach(x=>{const a=absSleep(k,x);const en=a.en!==null?a.en:(o&&o.k===k&&o.x.s===x.s?n:null);if(en===null)return;
+    const s0=Math.max(a.st,base),e0=Math.min(en,base+1440);if(e0>s0)blocks.push({l:(s0-base)/14.4,w:(e0-s0)/14.4,nap:!isNight(x.s)})}));
+  const dots=day.milk.map((ml,i)=>ml&&day.milkT[i]?toMin(day.milkT[i])/14.4:null).filter(v=>v!==null);
+  let tl='';[6,12,18].forEach(h=>tl+=`<i class="grid" style="left:${h/24*100}%"></i>`);
+  tl+=blocks.map(b=>`<i class="blk${b.nap?' nap':''}" style="left:${b.l}%;width:${b.w}%"></i>`).join('');
+  tl+=dots.map(x=>`<i class="ml" style="left:${x}%"></i>`).join('');
+  if(isToday)tl+=`<i class="now" style="left:${(n-base)/14.4}%"></i>`;
+  $('#timeline').innerHTML=tl;
+  $('#timeline').dataset.ticks='1';
+  if(!$('#timeline').nextElementSibling.classList.contains('ticks')){$('#timeline').insertAdjacentHTML('afterend','<div class="ticks"></div>')}
+  $('#timeline').nextElementSibling.innerHTML=[0,6,12,18,24].map(h=>`<span style="left:${h/24*100}%">${h}</span>`).join('');
+  // list
+  const tot=sleepTotals(date);
+  $('#tSleepList').textContent=t.listTitle;
+  $('#sleepTotal').textContent=t.sleepSum(tot.naps,fmtDur(tot.napM),tot.nightM?fmtDur(tot.nightM):'');
+  if(!$('#sleepList').contains(document.activeElement)){
+    $('#sleepList').innerHTML=day.sleeps.length?day.sleeps.map((x,i)=>{const dm=durMin(x.s,x.e),nt=isNight(x.s);
+      return `<div class="srow"><span class="badge ${nt?'night':'nap'}">${nt?t.night:t.nap}</span><input type="time" class="field" data-ss="${i}" value="${x.s}" aria-label="start"><span class="arrow">→</span><input type="time" class="field" data-se="${i}" value="${x.e||''}" aria-label="end"><span class="dur">${dm!==null?fmtDur(dm):t.ongoing}</span><button class="xbtn" data-sdel="${i}" aria-label="${t.delQ}">✕</button></div>`}).join(''):`<p class="empty-r">${t.noSleep}</p>`;
+  }
+  $('#sleepAdd').textContent=t.addSleep;
 }
 
 function render(){
@@ -571,6 +717,9 @@ function render(){
   const miss=Object.values(foods).filter(f=>!seen.has(f.id));
   $('#miss').innerHTML=miss.length?miss.map(f=>`<span class="tag${f.fe?' fe':''}">${esc(fname(f))}</span>`).join(''):`<span class="legend">${t.allDone}</span>`;
   $('#nameCard').hidden=!(mode==='cloud'&&me&&!(me.displayName||'').trim());$('#nmTitle').textContent=t.nmTitle;$('#nmSave').textContent=t.nmSave;$('#nmInput').placeholder=t.nameLabel;
+  document.querySelectorAll('#secTabs button').forEach(b=>{const k=b.dataset.s;b.innerHTML=(k==='sleep'&&ongoingSleep()?'<i class="live"></i>':'')+esc(k==='food'?t.secFood:k==='milk'?t.secMilk:t.secSleep);b.setAttribute('aria-selected',k===sec);b.setAttribute('role','tab')});
+  $('#meals').hidden=sec!=='food';$('#secFood').hidden=sec!=='food';$('#secMilk').hidden=sec!=='milk';$('#secSleep').hidden=sec!=='sleep';
+  renderStatus();if(sec==='sleep')renderSleep();
   $('#tabLog').textContent=t.tabLog;$('#tabReport').textContent=t.tabReport;
   $('#tabLog').setAttribute('aria-selected',view==='log');$('#tabReport').setAttribute('aria-selected',view==='report');
   $('#logView').hidden=view!=='log';$('#reportView').hidden=view!=='report';
@@ -600,6 +749,18 @@ $('#addForm').addEventListener('submit',e=>{e.preventDefault();const inp=$('#new
   custom=[...custom,{id:'c'+Date.now().toString(36),name:n,cat:$('#newCat').value}];
   write('config/foods',{custom});inp.value='';inp.blur();render();toast(L().added(n))});
 const nowHM=()=>{const n=new Date();return pad(n.getHours())+':'+pad(n.getMinutes())};
+$('#secTabs').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;sec=b.dataset.s;try{localStorage.setItem('hk-sec',sec)}catch(_){}render()};
+$('#snBtn').onclick=sleepTap;
+$('#sleepAdd').onclick=()=>{const d=getDay(date);d.sleeps.push({s:date===key(new Date())?nowHM():'13:00',e:null});d.sleeps=normSleeps(d.sleeps);days[date]=d;saveDay(date);render()};
+$('#sleepList').addEventListener('focusout',e=>{const a=e.target.closest('input[data-ss],input[data-se]');if(!a)return;const d=getDay(date);
+  if(a.dataset.ss!==undefined){const i=+a.dataset.ss;if(!a.value||d.sleeps[i].s===a.value)return;d.sleeps[i].s=a.value}
+  else{const i=+a.dataset.se,v=a.value||null;if(d.sleeps[i].e===v)return;d.sleeps[i].e=v}
+  d.sleeps=normSleeps(d.sleeps);days[date]=d;saveDay(date);setTimeout(render,0)});
+$('#sleepList').addEventListener('click',e=>{const b=e.target.closest('[data-sdel]');if(!b)return;
+  if(!b.classList.contains('confirm')){b.classList.add('confirm');b.textContent=L().delQ;setTimeout(()=>{if(b.isConnected){b.classList.remove('confirm');b.textContent='✕'}},3000);return}
+  const d=getDay(date);d.sleeps.splice(+b.dataset.sdel,1);days[date]=d;saveDay(date);render()});
+setInterval(()=>{if(document.hidden||$('#appView').hidden||view!=='log')return;renderStatus();if(sec==='sleep'&&!$('#sleepList').contains(document.activeElement))renderSleep();
+  document.querySelectorAll('#secTabs button').forEach(b=>{if(b.dataset.s==='sleep'){const has=!!b.querySelector('.live'),on=!!ongoingSleep();if(has!==on)render()}})},30000);
 $('#milkGrid').addEventListener('change',e=>{const d=getDay(date);const sel=e.target.closest('select[data-i]'),tm=e.target.closest('input[data-t]');
   if(sel){const i=+sel.dataset.i;d.milk[i]=sel.value?Number(sel.value):null;if(d.milk[i]&&!d.milkT[i]&&date===key(new Date()))d.milkT[i]=nowHM();if(!d.milk[i])d.milkT[i]=null;sel.blur()}
   else return;
