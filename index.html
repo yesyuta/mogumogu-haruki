@@ -181,6 +181,8 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 .xbtn{font:inherit;font-size:13px;border:0;background:none;color:var(--muted);min-width:36px;min-height:36px;cursor:pointer;border-radius:8px}
 .xbtn.confirm{color:#fff;background:var(--iron);padding:0 8px}
 .tile.sleep b{color:var(--sleep)}
+.updbar{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--iron-soft);color:var(--iron);border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700}
+.updbar .btn{background:var(--iron);color:#fff;min-height:38px}
 .btn.wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#1F8A4C;color:#fff}
 .btn.wa svg{width:20px;height:20px;flex:none}
 .btn.line{background:none;color:var(--leaf);border:1.5px solid var(--leaf)}
@@ -217,6 +219,7 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 </div>
 
 <div class="wrap" id="appView" hidden>
+  <div class="updbar" id="updBar" hidden><span></span><button class="btn" id="updBtn" type="button"></button></div>
   <header>
     <div>
       <h1 id="title"></h1>
@@ -339,6 +342,8 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 import { firebaseConfig } from './config.js';
 
 const FB='https://www.gstatic.com/firebasejs/10.12.2/';
+const APP_VERSION=11; // bump together with sw.js VERSION
+let readOnly=false;
 const CHECK='<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--surface)"/></svg>';
 
 const T={
@@ -377,6 +382,7 @@ const T={
    sleepSum:(n,nm,ng)=>[n?`お昼寝 ${n}回・${nm}`:'',ng?`夜 ${ng}`:''].filter(Boolean).join(' ／ '),
    tNight:'夜の睡眠 平均',tNap:'お昼寝 1日平均',nightLine:(a,b,w)=>`夜の睡眠: 平均 ${a}（寝かしつけ ${b}・起床 ${w}）`,napLine:(n,m)=>`お昼寝: 1日平均 ${n}回・${m}`,
    dSleep:x=>`ねんね（${x}）`,ongoing:'ねんね中',csvEnd:'終了',csvMin:'時間(分)',sleepName:'ねんね',endPh:'起きた',
+   outdated:'新しいバージョンがあります。記録を守るため、更新するまで保存を止めています。',reload:'更新する',
    waBtn:'この日の記録をWhatsAppで送る',dMilk:(n,t)=>`ミルク（${n}回・合計 ${t}ml）`,dIron:'鉄分',dNote:'メモ',dNone:'—',
    sHelp:'はじめて使う方は、自分のメールアドレスと好きなパスワードを決めてください。',sBtn:'パスワードを作って始める',
    toSignup:'はじめての方はこちら',toLogin:'すでにパスワードを作った方はこちら',
@@ -416,6 +422,7 @@ const T={
    sleepSum:(n,nm,ng)=>[n?`${n} ${n===1?'nap':'naps'} · ${nm}`:'',ng?`night ${ng}`:''].filter(Boolean).join(' / '),
    tNight:'Night sleep (avg)',tNap:'Naps per day (avg)',nightLine:(a,b,w)=>`Night sleep: ${a} on average (bedtime ${b}, wake ${w})`,napLine:(n,m)=>`Naps: ${n} per day, ${m} on average`,
    dSleep:x=>`Sleep (${x})`,ongoing:'asleep now',csvEnd:'End',csvMin:'Minutes',sleepName:'Sleep',endPh:'Woke',
+   outdated:'A newer version is available. Saving is paused until you update, to protect the log.',reload:'Update',
    waBtn:"Send this day's log on WhatsApp",dMilk:(n,t)=>`Milk (${n} ${n===1?'feed':'feeds'}, ${t}ml total)`,dIron:'Iron',dNote:'Note',dNone:'—',
    sHelp:'First time? Enter your email and choose a password.',sBtn:'Create password and start',
    toSignup:'First time here?',toLogin:'Already have a password? Sign in',
@@ -455,6 +462,7 @@ const T={
    sleepSum:(n,nm,ng)=>[n?`小睡 ${n}次·${nm}`:'',ng?`夜间 ${ng}`:''].filter(Boolean).join(' ／ '),
    tNight:'夜间睡眠 平均',tNap:'小睡 每天平均',nightLine:(a,b,w)=>`夜间睡眠：平均 ${a}（入睡 ${b}，起床 ${w}）`,napLine:(n,m)=>`小睡：平均每天 ${n}次，${m}`,
    dSleep:x=>`睡眠（${x}）`,ongoing:'睡眠中',csvEnd:'结束',csvMin:'时长(分钟)',sleepName:'睡眠',endPh:'醒来',
+   outdated:'有新版本。为了保护记录，更新前暂停保存。',reload:'更新',
    waBtn:'用 WhatsApp 发送这一天的记录',dMilk:(n,t)=>`奶（${n}次，合计 ${t}ml）`,dIron:'含铁',dNote:'备注',dNone:'—',
    sHelp:'第一次使用？请输入你的邮箱并设置密码。',sBtn:'设置密码并开始',
    toSignup:'第一次使用请点这里',toLogin:'已经设置过密码？点这里登录',
@@ -511,7 +519,8 @@ function saveLocal(){try{localStorage.setItem('hk-food',JSON.stringify({days,cus
 async function write(path,body){
   saveLocal();
   if(mode!=='cloud')return;
-  try{const [c,id]=path.split('/');await fs.setDoc(fs.doc(db,c,id),body)}
+  if(readOnly){toast(L().outdated);return}
+  try{const [c,id]=path.split('/');await fs.setDoc(fs.doc(db,c,id),body,{merge:true})}
   catch(e){toast(e&&e.code==='permission-denied'?L().noPerm:L().saveErr)}
 }
 let noteTimer=null;
@@ -815,6 +824,9 @@ else{
         if(document.activeElement===$('#note')&&days[date])n[date]={...(n[date]||emptyDay()),note:days[date].note};
         days=n;saveLocal();render();
       },err=>{toast(err.code==='permission-denied'?L().noPerm:L().saveErr)}));
+      unsubs.push(fsM.onSnapshot(fsM.doc(db,'config','app'),snap=>{const mv=snap.exists()?(snap.data().minVersion||0):0;
+        if(mv>APP_VERSION){readOnly=true;$('#updBar').hidden=false;$('#updBar span').textContent=L().outdated;$('#updBtn').textContent=L().reload}
+        else if(mv<APP_VERSION){fs.setDoc(fs.doc(db,'config','app'),{minVersion:APP_VERSION},{merge:true}).catch(()=>{})}}));
       unsubs.push(fsM.onSnapshot(fsM.doc(db,'config','foods'),snap=>{custom=snap.exists()?(snap.data().custom||[]):[];saveLocal();render()}));
     };
     authM.onAuthStateChanged(auth,u=>{
@@ -826,7 +838,13 @@ else{
   }catch(e){mode='local';show('app');toast(L().saveErr)}
 }
 
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+$('#updBtn').onclick=()=>location.reload();
+if('serviceWorker' in navigator){
+  const hadCtrl=!!navigator.serviceWorker.controller;let reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtrl||reloading)return;reloading=true;
+    const busy=document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);if(busy){$('#updBar').hidden=false;$('#updBar span').textContent=L().outdated;$('#updBtn').textContent=L().reload}else location.reload()});
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>{document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{})})}).catch(()=>{}));
+}
 </script>
 </body>
 </html>
