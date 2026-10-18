@@ -193,6 +193,16 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 .tip-h[aria-expanded="false"] .tip-c{transform:rotate(-90deg)}
 #tipText{margin:0;font-size:14px;line-height:1.65}
 .tip-src{margin:2px 0 0;font-size:11px;color:var(--muted)}
+.ftip{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.grp{display:flex;flex-wrap:wrap;gap:6px}
+.grp span{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.grp span.ok{background:var(--leaf-soft);color:var(--leaf);border-color:transparent}
+.grp span.fe.ok{background:var(--iron-soft);color:var(--iron)}
+.fhint{margin:0;font-size:14px;line-height:1.6}
+.fhint b{color:var(--ink)}
+.fdaily{border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.fdaily b{font-family:var(--display);font-size:15px;font-weight:800;word-break:auto-phrase}
+#fText{margin:0;font-size:14px;line-height:1.65}
 .btn.wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#1F8A4C;color:#fff}
 .btn.wa svg{width:20px;height:20px;flex:none}
 .btn.line{background:none;color:var(--leaf);border:1.5px solid var(--leaf)}
@@ -298,6 +308,12 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
   </div>
 
   <div id="secFood" class="stack">
+  <section class="ftip" id="foodCard">
+    <span class="tip-k" id="fKicker"></span>
+    <div class="grp" id="fGroups"></div>
+    <p class="fhint" id="fHint"></p>
+    <div class="fdaily"><b id="fTitle"></b><p id="fText"></p><p class="tip-src" id="fSrc"></p></div>
+  </section>
   <p class="today-sum" id="sum"></p>
   <div id="groups" style="display:flex;flex-direction:column;gap:18px"></div>
 
@@ -359,10 +375,10 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 
 <script type="module">
 import { firebaseConfig } from './config.js';
-import { TIPS, MILESTONES } from './tips.js';
+import { TIPS, MILESTONES, FOODTIPS } from './tips.js';
 
 const FB='https://www.gstatic.com/firebasejs/10.12.2/';
-const APP_VERSION=13; // bump together with sw.js VERSION
+const APP_VERSION=14; // bump together with sw.js VERSION
 let readOnly=false;
 const CHECK='<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--surface)"/></svg>';
 
@@ -406,6 +422,9 @@ const T={
    ageLine:a=>`生後 <b>${a.days}日</b> ・ ${a.weeks}週${a.wd}日 ・ ${a.months}ヶ月${a.md}日（${a.months+1}ヶ月目）`,ageShort:a=>`生後${a.days}日`,
    tipK:'今日のアドバイス',tipBday:m=>`今日で${m}ヶ月！`,msTitle:m=>`${m}ヶ月ごろによく見られること`,msNote:'発達のペースは一人ひとり違います。気になることは小児科で相談しましょう。',
    srcLabel:'出典',bTitle:'はるきの誕生日を入れてください（日齢・月齢の表示に使います）',bSave:'保存',bdayCongrats:m=>`はるき、${m}ヶ月おめでとう。この1ヶ月の成長を振り返ってみましょう。`,
+   fK:'離乳食アドバイス',ironG:'鉄分',hNone:'まだ記録がありません。主食・野菜・果物・たんぱく質を少しずつそろえるのが目安です。',
+   hIron3:ex=>`3日間、<b>鉄分の多い食材</b>がありません。${ex}などを入れてみましょう。`,hVitC:'鉄分の食材と一緒に<b>果物か野菜</b>も。ビタミンCが鉄の吸収を助けます。',
+   hMiss:(g,ex)=>`この日はまだ<b>${g}</b>がありません。${ex?'例：'+ex:''}`,hAll:'4つの食品グループがそろいました。いいバランスです。',
    waBtn:'この日の記録をWhatsAppで送る',dMilk:(n,t)=>`ミルク（${n}回・合計 ${t}ml）`,dIron:'鉄分',dNote:'メモ',dNone:'—',
    sHelp:'はじめて使う方は、自分のメールアドレスと好きなパスワードを決めてください。',sBtn:'パスワードを作って始める',
    toSignup:'はじめての方はこちら',toLogin:'すでにパスワードを作った方はこちら',
@@ -449,6 +468,9 @@ const T={
    ageLine:a=>`Day <b>${a.days}</b> · ${a.weeks} wk ${a.wd} d · ${a.months} mo ${a.md} d (month ${a.months+1})`,ageShort:a=>`Day ${a.days}`,
    tipK:"TODAY'S TIP",tipBday:m=>`${m} months today!`,msTitle:m=>`What many babies do by ${m} months`,msNote:'Every baby develops at his own pace. Talk to your doctor if anything worries you.',
    srcLabel:'Source',bTitle:"Enter Haruki's birthday (used for his age in days and months)",bSave:'Save',bdayCongrats:m=>`Happy ${m} months, Haruki! A good day to look back on this month.`,
+   fK:'FEEDING TIP',ironG:'Iron',hNone:'Nothing logged yet. Aim for a little of grains, vegetables, fruit and protein.',
+   hIron3:ex=>`No <b>iron-rich food</b> for 3 days. Try ${ex}.`,hVitC:'Add <b>fruit or vegetables</b> with the iron-rich food; vitamin C helps absorb iron.',
+   hMiss:(g,ex)=>`No <b>${g}</b> yet this day.${ex?' e.g. '+ex:''}`,hAll:'All four food groups today. Nicely balanced.',
    waBtn:"Send this day's log on WhatsApp",dMilk:(n,t)=>`Milk (${n} ${n===1?'feed':'feeds'}, ${t}ml total)`,dIron:'Iron',dNote:'Note',dNone:'—',
    sHelp:'First time? Enter your email and choose a password.',sBtn:'Create password and start',
    toSignup:'First time here?',toLogin:'Already have a password? Sign in',
@@ -492,6 +514,9 @@ const T={
    ageLine:a=>`出生第 <b>${a.days}</b> 天 · ${a.weeks}周${a.wd}天 · ${a.months}个月${a.md}天（第${a.months+1}个月）`,ageShort:a=>`第${a.days}天`,
    tipK:'今日育儿小贴士',tipBday:m=>`今天满${m}个月！`,msTitle:m=>`${m}个月左右常见的发展`,msNote:'每个宝宝的发展节奏都不同。有疑虑请咨询儿科医生。',
    srcLabel:'来源',bTitle:'请输入Haruki的生日（用于显示天数和月龄）',bSave:'保存',bdayCongrats:m=>`Haruki满${m}个月啦！回顾一下这个月的成长吧。`,
+   fK:'辅食小贴士',ironG:'铁',hNone:'还没有记录。主食、蔬菜、水果、蛋白质各吃一点是基本搭配。',
+   hIron3:ex=>`已经3天没有<b>富含铁的食物</b>了。试试${ex}。`,hVitC:'吃含铁食物时搭配<b>水果或蔬菜</b>，维生素C能帮助吸收铁。',
+   hMiss:(g,ex)=>`这一天还没有<b>${g}</b>。${ex?'例如：'+ex:''}`,hAll:'今天四大类食物都齐了，搭配很均衡。',
    waBtn:'用 WhatsApp 发送这一天的记录',dMilk:(n,t)=>`奶（${n}次，合计 ${t}ml）`,dIron:'含铁',dNote:'备注',dNone:'—',
    sHelp:'第一次使用？请输入你的邮箱并设置密码。',sBtn:'设置密码并开始',
    toSignup:'第一次使用请点这里',toLogin:'已经设置过密码？点这里登录',
@@ -505,10 +530,10 @@ const ZH={okayu:'白粥','cerelac-rice':'雀巢米粉（米）','cerelac-wheat':
  beef:'牛肉',chicken:'鸡肉',fish:'白身鱼',egg:'鸡蛋',tofu:'豆腐',peanut:'花生',ikanbilis:'江鱼仔',cheese:'奶酪',yogurt:'酸奶'};
 const MILK_ML=Array.from({length:22},(_,i)=>30+i*10); // 30,40,...,240ml
 const CATS=[
- {id:'grain',items:[['okayu','おかゆ','Rice congee'],['cerelac-rice','セレラック（米）','Cerelac (rice)'],['cerelac-wheat','セレラック（小麦）','Cerelac (wheat)'],['oats','オートミール','Oatmeal'],['bread','全粒粉パン','Wholemeal bread'],['ricepuff','ライスパフ','Rice puffs'],['udon','うどん','Udon'],['pasta','パスタ','Pasta']]},
- {id:'veg',items:[['carrot','にんじん','Carrot'],['broccoli','ブロッコリー','Broccoli'],['potato','じゃがいも','Potato'],['pumpkin','かぼちゃ','Pumpkin'],['cabbage','キャベツ','Cabbage'],['spinach','ほうれん草','Spinach',1],['corn','とうもろこし','Corn'],['sweetpotato','さつまいも','Sweet potato'],['tomato','トマト','Tomato']]},
- {id:'fruit',items:[['apple','りんご','Apple'],['banana','バナナ','Banana'],['prune','プルーン','Prune'],['pear','梨','Pear'],['avocado','アボカド','Avocado']]},
- {id:'protein',items:[['beef','牛肉','Beef',1],['chicken','鶏肉','Chicken'],['fish','白身魚','White fish'],['egg','卵','Egg'],['tofu','豆腐','Tofu'],['peanut','ピーナッツ','Peanut'],['ikanbilis','イカンビリス（いりこ）','Ikan bilis']]},
+ {id:'grain',items:[['okayu','おかゆ','Rice congee'],['cerelac-rice','セレラック（米）','Cerelac (rice)',1],['cerelac-wheat','セレラック（小麦）','Cerelac (wheat)',1],['oats','オートミール','Oatmeal'],['bread','全粒粉パン','Wholemeal bread'],['ricepuff','ライスパフ','Rice puffs'],['udon','うどん','Udon'],['pasta','パスタ','Pasta']]},
+ {id:'veg',items:[['carrot','にんじん','Carrot'],['broccoli','ブロッコリー','Broccoli',1],['potato','じゃがいも','Potato'],['pumpkin','かぼちゃ','Pumpkin'],['cabbage','キャベツ','Cabbage'],['spinach','ほうれん草','Spinach',1],['corn','とうもろこし','Corn'],['sweetpotato','さつまいも','Sweet potato',1],['tomato','トマト','Tomato']]},
+ {id:'fruit',items:[['apple','りんご','Apple'],['banana','バナナ','Banana'],['prune','プルーン','Prune'],['pear','梨','Pear'],['avocado','アボカド','Avocado',1]]},
+ {id:'protein',items:[['beef','牛肉','Beef',1],['chicken','鶏肉','Chicken',1],['fish','白身魚','White fish',1],['egg','卵','Egg',1],['tofu','豆腐','Tofu',1],['peanut','ピーナッツ','Peanut'],['ikanbilis','イカンビリス（いりこ）','Ikan bilis']]},
  {id:'dairy',items:[['cheese','チーズ','Cheese'],['yogurt','ヨーグルト','Yogurt']]},
 ];
 const $=s=>document.querySelector(s);
@@ -710,7 +735,7 @@ function renderSleep(){
 }
 
 let birth=(()=>{try{return localStorage.getItem('hk-birth')||''}catch(e){return''}})();
-const SRC={CDC:'CDC (U.S. Centers for Disease Control and Prevention)',AAP:'American Academy of Pediatrics (HealthyChildren.org)',HealthHub:'HealthHub Singapore (Ministry of Health)',CDA:'Communicable Diseases Agency Singapore – National Childhood Immunisation Schedule'};
+const SRC={HH:'HealthHub Singapore – Parent Hub “0-2 Years: Healthy Diet” (MOH / HPB)',HPB:'HealthHub / Health Promotion Board – “Early childhood nutrition from 6–12 months”',CDC:'CDC (U.S. Centers for Disease Control and Prevention)',AAP:'American Academy of Pediatrics (HealthyChildren.org)',HealthHub:'HealthHub Singapore (Ministry of Health)',CDA:'Communicable Diseases Agency Singapore – National Childhood Immunisation Schedule'};
 function ageAt(k){if(!birth)return null;const b=parse(birth),d=parse(k);const days=Math.round((d-b)/864e5);if(days<0)return null;
   let months=(d.getFullYear()-b.getFullYear())*12+(d.getMonth()-b.getMonth());if(d.getDate()<b.getDate())months--;
   const anchor=new Date(b.getFullYear(),b.getMonth()+months,1);anchor.setDate(Math.min(b.getDate(),new Date(anchor.getFullYear(),anchor.getMonth()+1,0).getDate()));
@@ -730,6 +755,28 @@ function renderTip(){const t=L(),k=key(new Date()),a=ageAt(k);
     $('#tipSrc').textContent=ms?`${t.srcLabel}: ${SRC.CDC}`:''}
   else{const v=tp[lang]||tp.en;$('#tipTitle').textContent=v[0];$('#tipText').textContent=v[1];$('#tipSrc').textContent=`${t.srcLabel}: ${SRC[tp.src]||tp.src}`}
   $('#tipToggle').setAttribute('aria-expanded',tipOpen);$('#tipBody').hidden=!tipOpen}
+
+function renderFood(){
+  const t=L(),foods=allFoods(),sep=t.sep,ids=dayIds(date,foods),has=c=>ids.some(id=>foods[id].cat===c);
+  $('#fKicker').textContent=t.fK;
+  const G=['grain','veg','fruit','protein','dairy'];
+  $('#fGroups').innerHTML=G.map(c=>`<span class="${has(c)?'ok':''}">${has(c)?'✓ ':''}${esc(t.cats[c])}</span>`).join('')+`<span class="fe ${ids.some(id=>foods[id].fe)?'ok':''}">${ids.some(id=>foods[id].fe)?'✓ ':''}${esc(t.ironG)}</span>`;
+  // examples: prefer foods already eaten in the last 14 days (known to be OK for him)
+  const recent=new Set();for(let i=1;i<=14;i++)dayIds(shiftKey(date,-i),foods).forEach(x=>recent.add(x));
+  const ex=(pred,n=3)=>{const all=Object.values(foods).filter(pred).filter(f=>!ids.includes(f.id));const pick=[...all.filter(f=>recent.has(f.id)),...all.filter(f=>!recent.has(f.id))];return pick.slice(0,n).map(f=>esc(fname(f))).join(sep)};
+  let h;
+  if(!ids.length)h=t.hNone;
+  else{const ironToday=ids.some(id=>foods[id].fe),iron3=ironToday||[1,2].some(i=>dayIds(shiftKey(date,-i),foods).some(id=>foods[id].fe));
+    const miss=['grain','veg','fruit','protein'].filter(c=>!has(c));
+    if(!iron3)h=t.hIron3(ex(f=>f.fe));
+    else if(ironToday&&!has('fruit')&&!has('veg'))h=t.hVitC;
+    else if(miss.length)h=t.hMiss(miss.map(c=>esc(t.cats[c])).join(sep),ex(f=>f.cat===miss[0]));
+    else h=t.hAll}
+  $('#fHint').innerHTML=h;
+  const a=ageAt(key(new Date()));let list=FOODTIPS;if(a){const l=FOODTIPS.filter(x=>a.months>=x.m[0]&&a.months<=x.m[1]);if(l.length)list=l}
+  const n=a?a.days:Math.floor(Date.now()/864e5);const tp=list[(n*7+3)%list.length];const v=tp[lang]||tp.en;
+  $('#fTitle').textContent=v[0];$('#fText').textContent=v[1];$('#fSrc').textContent=`${t.srcLabel}: ${SRC[tp.src]||tp.src}`;
+}
 
 function render(){
   const t=L(),d=parse(date),isToday=date===key(new Date());
@@ -779,7 +826,7 @@ function render(){
   $('#nameCard').hidden=!(mode==='cloud'&&me&&!(me.displayName||'').trim());$('#nmTitle').textContent=t.nmTitle;$('#nmSave').textContent=t.nmSave;$('#nmInput').placeholder=t.nameLabel;
   document.querySelectorAll('#secTabs button').forEach(b=>{const k=b.dataset.s;b.innerHTML=(k==='sleep'&&ongoingSleep()?'<i class="live"></i>':'')+esc(k==='food'?t.secFood:k==='milk'?t.secMilk:t.secSleep);b.setAttribute('aria-selected',k===sec);b.setAttribute('role','tab')});
   $('#meals').hidden=sec!=='food';$('#secFood').hidden=sec!=='food';$('#secMilk').hidden=sec!=='milk';$('#secSleep').hidden=sec!=='sleep';
-  renderStatus();if(sec==='sleep')renderSleep();
+  renderStatus();if(sec==='sleep')renderSleep();if(sec==='food')renderFood();
   $('#tabLog').textContent=t.tabLog;$('#tabReport').textContent=t.tabReport;
   $('#tabLog').setAttribute('aria-selected',view==='log');$('#tabReport').setAttribute('aria-selected',view==='report');
   $('#logView').hidden=view!=='log';$('#reportView').hidden=view!=='report';
