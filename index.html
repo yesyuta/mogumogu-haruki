@@ -183,6 +183,16 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 .tile.sleep b{color:var(--sleep)}
 .updbar{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--iron-soft);color:var(--iron);border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700}
 .updbar .btn{background:var(--iron);color:#fff;min-height:38px}
+.age{font-variant-numeric:tabular-nums}
+.age b{color:var(--ink);font-weight:700}
+.tip{background:var(--leaf-soft);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.tip-h{display:grid;grid-template-columns:1fr auto;grid-template-areas:'k c' 't c';gap:2px 10px;text-align:left;background:none;border:0;padding:0;font:inherit;color:var(--ink);cursor:pointer}
+.tip-k{grid-area:k;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--leaf)}
+.tip-h b{grid-area:t;font-family:var(--display);font-size:16px;font-weight:800;text-wrap:pretty;word-break:auto-phrase}
+.tip-c{grid-area:c;align-self:center;font-style:normal;color:var(--leaf);transition:transform .2s}
+.tip-h[aria-expanded="false"] .tip-c{transform:rotate(-90deg)}
+#tipText{margin:0;font-size:14px;line-height:1.65}
+.tip-src{margin:2px 0 0;font-size:11px;color:var(--muted)}
 .btn.wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#1F8A4C;color:#fff}
 .btn.wa svg{width:20px;height:20px;flex:none}
 .btn.line{background:none;color:var(--leaf);border:1.5px solid var(--leaf)}
@@ -223,7 +233,7 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
   <header>
     <div>
       <h1 id="title"></h1>
-      <p class="sub" id="subtitle"></p>
+      <p class="sub age" id="subtitle"></p>
     </div>
     <div class="hright">
       <div class="lang" role="group" aria-label="Language"><button data-l="ja">日本語</button><button data-l="en">EN</button><button data-l="zh">中文</button></div>
@@ -234,6 +244,15 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
   <form class="rcard" id="nameCard" hidden>
     <h2 id="nmTitle"></h2>
     <div class="add"><input class="field" id="nmInput" maxlength="20" autocomplete="nickname"><button class="btn" type="submit" id="nmSave"></button></div>
+  </form>
+
+  <section class="tip" id="tipCard" hidden>
+    <button class="tip-h" id="tipToggle" type="button" aria-expanded="true"><span class="tip-k" id="tipKicker"></span><b id="tipTitle"></b><i class="tip-c" aria-hidden="true">▾</i></button>
+    <div id="tipBody"><p id="tipText"></p><p class="tip-src" id="tipSrc"></p></div>
+  </section>
+  <form class="rcard" id="birthCard" hidden>
+    <h2 id="bTitle"></h2>
+    <div class="add"><input class="field" type="date" id="bInput" required><button class="btn" type="submit" id="bSave"></button></div>
   </form>
 
   <div class="tabs" role="tablist">
@@ -340,9 +359,10 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 
 <script type="module">
 import { firebaseConfig } from './config.js';
+import { TIPS, MILESTONES } from './tips.js';
 
 const FB='https://www.gstatic.com/firebasejs/10.12.2/';
-const APP_VERSION=12; // bump together with sw.js VERSION
+const APP_VERSION=13; // bump together with sw.js VERSION
 let readOnly=false;
 const CHECK='<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--surface)"/></svg>';
 
@@ -383,6 +403,9 @@ const T={
    tNight:'夜の睡眠 平均',tNap:'お昼寝 1日平均',nightLine:(a,b,w)=>`夜の睡眠: 平均 ${a}（寝かしつけ ${b}・起床 ${w}）`,napLine:(n,m)=>`お昼寝: 1日平均 ${n}回・${m}`,
    dSleep:x=>`ねんね（${x}）`,ongoing:'ねんね中',csvEnd:'終了',csvMin:'時間(分)',sleepName:'ねんね',endPh:'起きた',
    outdated:'新しいバージョンがあります。記録を守るため、更新するまで保存を止めています。',reload:'更新する',
+   ageLine:a=>`生後 <b>${a.days}日</b> ・ ${a.weeks}週${a.wd}日 ・ ${a.months}ヶ月${a.md}日（${a.months+1}ヶ月目）`,ageShort:a=>`生後${a.days}日`,
+   tipK:'今日のアドバイス',tipBday:m=>`今日で${m}ヶ月！`,msTitle:m=>`${m}ヶ月ごろによく見られること`,msNote:'発達のペースは一人ひとり違います。気になることは小児科で相談しましょう。',
+   srcLabel:'出典',bTitle:'はるきの誕生日を入れてください（日齢・月齢の表示に使います）',bSave:'保存',bdayCongrats:m=>`はるき、${m}ヶ月おめでとう。この1ヶ月の成長を振り返ってみましょう。`,
    waBtn:'この日の記録をWhatsAppで送る',dMilk:(n,t)=>`ミルク（${n}回・合計 ${t}ml）`,dIron:'鉄分',dNote:'メモ',dNone:'—',
    sHelp:'はじめて使う方は、自分のメールアドレスと好きなパスワードを決めてください。',sBtn:'パスワードを作って始める',
    toSignup:'はじめての方はこちら',toLogin:'すでにパスワードを作った方はこちら',
@@ -423,6 +446,9 @@ const T={
    tNight:'Night sleep (avg)',tNap:'Naps per day (avg)',nightLine:(a,b,w)=>`Night sleep: ${a} on average (bedtime ${b}, wake ${w})`,napLine:(n,m)=>`Naps: ${n} per day, ${m} on average`,
    dSleep:x=>`Sleep (${x})`,ongoing:'asleep now',csvEnd:'End',csvMin:'Minutes',sleepName:'Sleep',endPh:'Woke',
    outdated:'A newer version is available. Saving is paused until you update, to protect the log.',reload:'Update',
+   ageLine:a=>`Day <b>${a.days}</b> · ${a.weeks} wk ${a.wd} d · ${a.months} mo ${a.md} d (month ${a.months+1})`,ageShort:a=>`Day ${a.days}`,
+   tipK:"TODAY'S TIP",tipBday:m=>`${m} months today!`,msTitle:m=>`What many babies do by ${m} months`,msNote:'Every baby develops at his own pace. Talk to your doctor if anything worries you.',
+   srcLabel:'Source',bTitle:"Enter Haruki's birthday (used for his age in days and months)",bSave:'Save',bdayCongrats:m=>`Happy ${m} months, Haruki! A good day to look back on this month.`,
    waBtn:"Send this day's log on WhatsApp",dMilk:(n,t)=>`Milk (${n} ${n===1?'feed':'feeds'}, ${t}ml total)`,dIron:'Iron',dNote:'Note',dNone:'—',
    sHelp:'First time? Enter your email and choose a password.',sBtn:'Create password and start',
    toSignup:'First time here?',toLogin:'Already have a password? Sign in',
@@ -463,6 +489,9 @@ const T={
    tNight:'夜间睡眠 平均',tNap:'小睡 每天平均',nightLine:(a,b,w)=>`夜间睡眠：平均 ${a}（入睡 ${b}，起床 ${w}）`,napLine:(n,m)=>`小睡：平均每天 ${n}次，${m}`,
    dSleep:x=>`睡眠（${x}）`,ongoing:'睡眠中',csvEnd:'结束',csvMin:'时长(分钟)',sleepName:'睡眠',endPh:'醒来',
    outdated:'有新版本。为了保护记录，更新前暂停保存。',reload:'更新',
+   ageLine:a=>`出生第 <b>${a.days}</b> 天 · ${a.weeks}周${a.wd}天 · ${a.months}个月${a.md}天（第${a.months+1}个月）`,ageShort:a=>`第${a.days}天`,
+   tipK:'今日育儿小贴士',tipBday:m=>`今天满${m}个月！`,msTitle:m=>`${m}个月左右常见的发展`,msNote:'每个宝宝的发展节奏都不同。有疑虑请咨询儿科医生。',
+   srcLabel:'来源',bTitle:'请输入Haruki的生日（用于显示天数和月龄）',bSave:'保存',bdayCongrats:m=>`Haruki满${m}个月啦！回顾一下这个月的成长吧。`,
    waBtn:'用 WhatsApp 发送这一天的记录',dMilk:(n,t)=>`奶（${n}次，合计 ${t}ml）`,dIron:'含铁',dNote:'备注',dNone:'—',
    sHelp:'第一次使用？请输入你的邮箱并设置密码。',sBtn:'设置密码并开始',
    toSignup:'第一次使用请点这里',toLogin:'已经设置过密码？点这里登录',
@@ -608,7 +637,7 @@ async function exportCsv(){
 }
 function dayText(k){
   const t=L(),d=getDay(k),foods=allFoods(),sep=t.sep,colon=lang==='en'?': ':'：';
-  const out=[`${t.title}  ${t.date(parse(k))}`,''];
+  const ag=ageAt(k);const out=[`${t.title}  ${t.date(parse(k))}`+(ag?`  (${t.ageShort(ag)})`:''),''];
   MEALS.forEach(m=>{const ids=d.meals[m].filter(id=>foods[id]);out.push(t.meals[m]+colon+(ids.length?ids.map(id=>fname(foods[id])).join(sep):t.dNone))});
   const feeds=d.milk.map((ml,i)=>ml?{ml,tm:d.milkT[i]}:null).filter(Boolean);
   if(feeds.length){out.push('',t.dMilk(feeds.length,milkSum(d.milk)));feeds.slice().sort((a,b)=>(a.tm||'99').localeCompare(b.tm||'99')).forEach(f=>out.push(`・${f.tm?f.tm+'  ':''}${f.ml}ml`))}
@@ -680,15 +709,37 @@ function renderSleep(){
   $('#sleepAdd').textContent=t.addSleep;
 }
 
+let birth=(()=>{try{return localStorage.getItem('hk-birth')||''}catch(e){return''}})();
+const SRC={CDC:'CDC (U.S. Centers for Disease Control and Prevention)',AAP:'American Academy of Pediatrics (HealthyChildren.org)',HealthHub:'HealthHub Singapore (Ministry of Health)',CDA:'Communicable Diseases Agency Singapore – National Childhood Immunisation Schedule'};
+function ageAt(k){if(!birth)return null;const b=parse(birth),d=parse(k);const days=Math.round((d-b)/864e5);if(days<0)return null;
+  let months=(d.getFullYear()-b.getFullYear())*12+(d.getMonth()-b.getMonth());if(d.getDate()<b.getDate())months--;
+  const anchor=new Date(b.getFullYear(),b.getMonth()+months,1);anchor.setDate(Math.min(b.getDate(),new Date(anchor.getFullYear(),anchor.getMonth()+1,0).getDate()));
+  return{days,weeks:Math.floor(days/7),wd:days%7,months,md:Math.round((d-anchor)/864e5)}}
+function tipFor(k){const a=ageAt(k);if(!a)return null;
+  if(a.md===0&&a.months>0)return{bday:a.months};
+  let list=TIPS.filter(x=>a.months>=x.m[0]&&a.months<=x.m[1]);if(!list.length)list=TIPS.filter(x=>x.m[1]>=24);
+  return list[a.days%list.length]}
+let tipOpen=(()=>{try{return localStorage.getItem('hk-tip')!=='0'}catch(e){return true}})();
+function renderTip(){const t=L(),k=key(new Date()),a=ageAt(k);
+  $('#subtitle').innerHTML=a?t.ageLine(a):esc(t.sub);
+  $('#birthCard').hidden=!!birth||mode==='login';$('#bTitle').textContent=t.bTitle;$('#bSave').textContent=t.bSave;
+  const tp=tipFor(k);$('#tipCard').hidden=!tp;if(!tp)return;
+  $('#tipKicker').textContent=t.tipK;
+  if(tp.bday){const ms=MILESTONES[tp.bday];$('#tipTitle').textContent=t.tipBday(tp.bday);
+    $('#tipText').innerHTML=esc(t.bdayCongrats(tp.bday))+(ms?`<br><br><b>${esc(t.msTitle(tp.bday))}</b><br>${esc(ms[lang])}<br><br>${esc(t.msNote)}`:'');
+    $('#tipSrc').textContent=ms?`${t.srcLabel}: ${SRC.CDC}`:''}
+  else{const v=tp[lang]||tp.en;$('#tipTitle').textContent=v[0];$('#tipText').textContent=v[1];$('#tipSrc').textContent=`${t.srcLabel}: ${SRC[tp.src]||tp.src}`}
+  $('#tipToggle').setAttribute('aria-expanded',tipOpen);$('#tipBody').hidden=!tipOpen}
+
 function render(){
   const t=L(),d=parse(date),isToday=date===key(new Date());
   document.documentElement.lang=lang==='zh'?'zh-Hans':lang;
   document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===lang));
-  $('#title').textContent=t.title;$('#subtitle').textContent=t.sub;
+  $('#title').textContent=t.title;renderTip();
   $('#sync').classList.toggle('on',mode==='cloud'&&!pending);
   $('#sync span').textContent=mode!=='cloud'?t.local:(pending?t.pending:t.live+(myName()?' · '+myName():''));
   $('#logout').textContent=t.logout;$('#logout').hidden=mode!=='cloud';
-  $('#dlabel').innerHTML=`${t.date(d)}<small>${isToday?t.today:t.ago(Math.round((new Date(new Date().setHours(0,0,0,0))-d)/864e5))}</small>`;
+  const ag=ageAt(date);$('#dlabel').innerHTML=`${t.date(d)}<small>${isToday?t.today:t.ago(Math.round((new Date(new Date().setHours(0,0,0,0))-d)/864e5))}${ag?' ・ '+t.ageShort(ag):''}</small>`;
   $('#todayBtn').textContent=t.today;$('#todayBtn').hidden=isToday;
   const day=getDay(date),foods=allFoods();
 
@@ -758,6 +809,10 @@ $('#addForm').addEventListener('submit',e=>{e.preventDefault();const inp=$('#new
   custom=[...custom,{id:'c'+Date.now().toString(36),name:n,cat:$('#newCat').value}];
   write('config/foods',{custom});inp.value='';inp.blur();render();toast(L().added(n))});
 const nowHM=()=>{const n=new Date();return pad(n.getHours())+':'+pad(n.getMinutes())};
+$('#tipToggle').onclick=()=>{tipOpen=!tipOpen;try{localStorage.setItem('hk-tip',tipOpen?'1':'0')}catch(_){}renderTip()};
+$('#birthCard').addEventListener('submit',async e=>{e.preventDefault();const v=$('#bInput').value;if(!/^\d{4}-\d\d-\d\d$/.test(v))return;
+  birth=v;try{localStorage.setItem('hk-birth',v)}catch(_){}
+  if(mode==='cloud'&&!readOnly){try{await fs.setDoc(fs.doc(db,'config','baby'),{birth:v},{merge:true})}catch(err){toast(L().saveErr)}}render()});
 $('#secTabs').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;sec=b.dataset.s;try{localStorage.setItem('hk-sec',sec)}catch(_){}render()};
 $('#snBtn').onclick=sleepTap;
 $('#sleepAdd').onclick=()=>{const d=getDay(date);d.sleeps.push({s:date===key(new Date())?nowHM():'13:00',e:null});d.sleeps=normSleeps(d.sleeps);days[date]=d;saveDay(date);render()};
@@ -827,6 +882,7 @@ else{
       unsubs.push(fsM.onSnapshot(fsM.doc(db,'config','app'),snap=>{const mv=snap.exists()?(snap.data().minVersion||0):0;
         if(mv>APP_VERSION){readOnly=true;$('#updBar').hidden=false;$('#updBar span').textContent=L().outdated;$('#updBtn').textContent=L().reload}
         else if(mv<APP_VERSION){fs.setDoc(fs.doc(db,'config','app'),{minVersion:APP_VERSION},{merge:true}).catch(()=>{})}}));
+      unsubs.push(fsM.onSnapshot(fsM.doc(db,'config','baby'),snap=>{const b=snap.exists()?(snap.data().birth||''):'';if(b&&b!==birth){birth=b;try{localStorage.setItem('hk-birth',b)}catch(_){}render()}}));
       unsubs.push(fsM.onSnapshot(fsM.doc(db,'config','foods'),snap=>{custom=snap.exists()?(snap.data().custom||[]):[];saveLocal();render()}));
     };
     authM.onAuthStateChanged(auth,u=>{
