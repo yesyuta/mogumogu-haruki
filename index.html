@@ -342,7 +342,7 @@ input[type=time]::-webkit-calendar-picker-indicator{display:none}
 import { firebaseConfig } from './config.js';
 
 const FB='https://www.gstatic.com/firebasejs/10.12.2/';
-const APP_VERSION=11; // bump together with sw.js VERSION
+const APP_VERSION=12; // bump together with sw.js VERSION
 let readOnly=false;
 const CHECK='<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--surface)"/></svg>';
 
@@ -474,7 +474,7 @@ const ZH={okayu:'白粥','cerelac-rice':'雀巢米粉（米）','cerelac-wheat':
  carrot:'胡萝卜',broccoli:'西兰花',potato:'土豆',pumpkin:'南瓜',cabbage:'包菜',spinach:'菠菜',corn:'玉米',sweetpotato:'番薯',tomato:'番茄',
  apple:'苹果',banana:'香蕉',prune:'西梅',pear:'梨',avocado:'牛油果',
  beef:'牛肉',chicken:'鸡肉',fish:'白身鱼',egg:'鸡蛋',tofu:'豆腐',peanut:'花生',ikanbilis:'江鱼仔',cheese:'奶酪',yogurt:'酸奶'};
-const MILK_ML=[30,60,90,120,150,180,210,240];
+const MILK_ML=Array.from({length:22},(_,i)=>30+i*10); // 30,40,...,240ml
 const CATS=[
  {id:'grain',items:[['okayu','おかゆ','Rice congee'],['cerelac-rice','セレラック（米）','Cerelac (rice)'],['cerelac-wheat','セレラック（小麦）','Cerelac (wheat)'],['oats','オートミール','Oatmeal'],['bread','全粒粉パン','Wholemeal bread'],['ricepuff','ライスパフ','Rice puffs'],['udon','うどん','Udon'],['pasta','パスタ','Pasta']]},
  {id:'veg',items:[['carrot','にんじん','Carrot'],['broccoli','ブロッコリー','Broccoli'],['potato','じゃがいも','Potato'],['pumpkin','かぼちゃ','Pumpkin'],['cabbage','キャベツ','Cabbage'],['spinach','ほうれん草','Spinach',1],['corn','とうもろこし','Corn'],['sweetpotato','さつまいも','Sweet potato'],['tomato','トマト','Tomato']]},
