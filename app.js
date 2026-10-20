@@ -2,7 +2,7 @@ import { firebaseConfig } from './config.js';
 import { TIPS, MILESTONES, FOODTIPS } from './tips.js';
 
 const FB='https://www.gstatic.com/firebasejs/10.12.2/';
-const APP_VERSION=15; // bump together with sw.js VERSION
+const APP_VERSION=16; // bump together with sw.js VERSION
 let readOnly=false;
 const CHECK='<svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--surface)"/></svg>';
 

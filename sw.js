@@ -1,6 +1,6 @@
 // アプリを更新したら VERSION の数字を1つ上げてください
 // Bump VERSION whenever you upload changed files.
-const VERSION = 'v15';
+const VERSION = 'v16';
 const SHELL = ['./', './index.html', './config.js', './tips.js', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
